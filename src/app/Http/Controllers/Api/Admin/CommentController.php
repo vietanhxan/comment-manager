@@ -3,15 +3,15 @@
 namespace VCComponent\Laravel\Comment\Http\Controllers\Api\Admin;
 
 use Illuminate\Http\Request;
+use VCComponent\Laravel\Comment\Actions\CommentCountAction;
+use VCComponent\Laravel\Comment\Entities\Comment;
+use VCComponent\Laravel\Comment\Entities\CommentCount;
 use VCComponent\Laravel\Comment\Events\CommentCreatedByAdminEvent;
 use VCComponent\Laravel\Comment\Events\CommentDeletedByAdminEvent;
 use VCComponent\Laravel\Comment\Events\CommentUpdatedByAdminEvent;
 use VCComponent\Laravel\Comment\Repositories\CommentRepository;
 use VCComponent\Laravel\Comment\Validators\CommentValidator;
 use VCComponent\Laravel\Vicoders\Core\Controllers\ApiController;
-use VCComponent\Laravel\Comment\Actions\CommentCountAction;
-use VCComponent\Laravel\Comment\Entities\Comment;
-use VCComponent\Laravel\Comment\Entities\CommentCount;
 
 class CommentController extends ApiController
 {
@@ -45,7 +45,13 @@ class CommentController extends ApiController
         $per_page = $request->has('per_page') ? (int) $request->get('per_page') : 15;
         $comments = $query->paginate($per_page);
 
-        return $this->response->paginator($comments, new $this->transformer);
+        if ($request->has('includes')) {
+            $transformer = new $this->transformer(explode(',', $request->get('includes')));
+        } else {
+            $transformer = new $this->transformer;
+        }
+
+        return $this->response->paginator($comments, $transformer);
     }
 
     function list(Request $request) {
@@ -61,7 +67,14 @@ class CommentController extends ApiController
         }
 
         $comments = $query->get();
-        return $this->response->collection($comments, new $this->transformer());
+
+        if ($request->has('includes')) {
+            $transformer = new $this->transformer(explode(',', $request->get('includes')));
+        } else {
+            $transformer = new $this->transformer;
+        }
+
+        return $this->response->collection($comments, $transformer);
     }
 
     public function store(Request $request)
@@ -92,18 +105,24 @@ class CommentController extends ApiController
         return $this->response->item($comment, new $this->transformer);
     }
 
-    public function show($id)
+    public function show($id, Request $request)
     {
         $comment = $this->repository->findById($id);
-        return $this->response->item($comment, new $this->transformer);
+
+        if ($request->has('includes')) {
+            $transformer = new $this->transformer(explode(',', $request->get('includes')));
+        } else {
+            $transformer = new $this->transformer;
+        }
+
+        return $this->response->item($comment, $transformer);
     }
 
     public function destroy($id)
     {
         $comment = $this->repository->findById($id);
 
-
-        $comments = Comment::where('commentable_id' , $comment->commentable_id)->where('commentable_type', $comment->commentable_type)->first();
+        $comments = Comment::where('commentable_id', $comment->commentable_id)->where('commentable_type', $comment->commentable_type)->first();
 
         $data = [
             'commentable_id'   => $comments->commentable_id,

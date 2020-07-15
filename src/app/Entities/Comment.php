@@ -4,6 +4,8 @@ namespace VCComponent\Laravel\Comment\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use VCComponent\Laravel\Comment\Traits\HasCommentTrait;
+use VCComponent\Laravel\Post\Entities\Post;
+use VCComponent\Laravel\Product\Entities\Product;
 
 class Comment extends Model
 {
@@ -18,11 +20,20 @@ class Comment extends Model
         'email',
         'name',
         'content',
-        'status',
     ];
 
     public function commentable()
     {
         return $this->morphTo();
+    }
+
+    public function post()
+    {
+        return $this->belongsTo(Post::class, 'commentable_id');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'commentable_id');
     }
 }

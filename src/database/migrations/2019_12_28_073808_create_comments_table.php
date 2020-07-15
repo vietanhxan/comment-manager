@@ -20,7 +20,7 @@ class CreateCommentsTable extends Migration
             $table->string('email')->nullable();
             $table->string('name');
             $table->longText('content');
-            $table->tinyInteger('status')->default(0);
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }

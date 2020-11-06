@@ -15,7 +15,6 @@ class CommentCount extends Model
     protected $fillable = [
         'commentable_id',
         'commentable_type',
-        'comment_type',
         'count',
     ];
 

@@ -25,8 +25,6 @@ class AlterCommentCountsTable extends Migration
      */
     public function down()
     {
-        Schema::table('comment_counts', function (Blueprint $table) {
-            $table->string('comment_type')->nullable()->after('commentable_type');
-        });
+        //
     }
 }
